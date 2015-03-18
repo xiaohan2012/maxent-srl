@@ -10,6 +10,9 @@ def parse_fulltext(path):
     """
     Return the annotations of sentences that contain at least one manual annotation
     
+    It's something like:
+    [(sentence_words, [annotation1, anntatation2]), (....), (....)]
+    
     >>> result = parse_fulltext("test_data/annotation1.xml")
     >>> len(result)
     1
@@ -27,8 +30,6 @@ def parse_fulltext(path):
     result = []
     for sent in tree.xpath('sentence'):
         sent_str = sent.xpath('text')[0].text.decode('utf8')
-        # import pdb
-        # pdb.set_trace()
         annotations = []
         for a in sent.xpath('annotationSet[@status="MANUAL"]'):
             target_node = a.xpath('layer[@name="Target"]/label')[0]
