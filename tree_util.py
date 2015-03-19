@@ -35,7 +35,6 @@ def collect_nodes(tree):
     aux(tree, nodes)
     return nodes
 
-
 def find_node_by_positions(tree, start, end):
     """
     Given the start/end(inclusive) index of the text string, find the corresponding node in the tree
