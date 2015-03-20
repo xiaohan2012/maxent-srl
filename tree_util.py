@@ -6,7 +6,8 @@ def collect_nodes(tree):
 
     >>> from nltk.tree import Tree
     >>> tree = Tree('ROOT', [Tree('S', [Tree('NP', [Tree('PRP', ['I'])]), Tree('VP', [Tree('VBP', ['love']), Tree('NP', [Tree('PRP', ['you'])])])])])
-    >>> nodes = collect_nodes(tree)
+    >>> node_info = collect_nodes(tree)
+    >>> nodes = [n for n,pos in node_info]
     >>> len(nodes)
     8
     >>> tree in nodes
@@ -23,16 +24,23 @@ def collect_nodes(tree):
     True
     >>> 'I' in nodes
     False
+    >>> node_info
+    [(Tree('PRP', ['I']), (0, 0)), (Tree('NP', [Tree('PRP', ['I'])]), (0, 0)), (Tree('VBP', ['love']), (2, 5)), (Tree('PRP', ['you']), (7, 9)), (Tree('NP', [Tree('PRP', ['you'])]), (7, 9)), (Tree('VP', [Tree('VBP', ['love']), Tree('NP', [Tree('PRP', ['you'])])]), (2, 9)), (Tree('S', [Tree('NP', [Tree('PRP', ['I'])]), Tree('VP', [Tree('VBP', ['love']), Tree('NP', [Tree('PRP', ['you'])])])]), (0, 9)), (Tree('ROOT', [Tree('S', [Tree('NP', [Tree('PRP', ['I'])]), Tree('VP', [Tree('VBP', ['love']), Tree('NP', [Tree('PRP', ['you'])])])])]), (0, 9))]
     """
     assert isinstance(tree, Tree)
-    def aux(subtree, acc):
+    def aux(subtree, acc, start):
         if isinstance(subtree, Tree):
-            acc.append(subtree)
+            start_offset = start
             for i in xrange(len(subtree)):
-                aux(subtree[i], acc)
-
+                if isinstance(subtree[i], Tree):
+                    length = len(' '.join(subtree[i].leaves()))
+                else: # a string
+                    length = len(subtree[i])
+                aux(subtree[i], acc, start_offset)
+                start_offset += (length+1) # one space
+            acc.append((subtree, (start, start_offset-2)))
     nodes = []
-    aux(tree, nodes)
+    aux(tree, nodes, 0)
     return nodes
 
 def find_node_by_positions(tree, start, end):
