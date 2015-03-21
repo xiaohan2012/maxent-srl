@@ -1,3 +1,4 @@
+import sys, io
 from lxml import etree
 from collections import namedtuple
 Annotation = namedtuple('Annotation', ['frame_name', 'target', 'FE'])
@@ -5,15 +6,44 @@ Target = namedtuple('Target', ['start', 'end'])
 FrameElement = namedtuple('FrameElement', ['start', 'end', 'name'])
 
 parser = etree.XMLParser(ns_clean=True)
+
+#######################
+# Remove namespace by using an XSL transformation
+#######################
+xslt="""<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+<xsl:output method="xml" indent="no"/>
+
+<xsl:template match="/|comment()|processing-instruction()">
+    <xsl:copy>
+      <xsl:apply-templates/>
+    </xsl:copy>
+</xsl:template>
+
+<xsl:template match="*">
+    <xsl:element name="{local-name()}">
+      <xsl:apply-templates select="@*|node()"/>
+    </xsl:element>
+</xsl:template>
+
+<xsl:template match="@*">
+    <xsl:attribute name="{local-name()}">
+      <xsl:value-of select="."/>
+    </xsl:attribute>
+</xsl:template>
+</xsl:stylesheet>
+"""
+
+xslt_doc=etree.parse(io.BytesIO(xslt))
+transform=etree.XSLT(xslt_doc)
     
 def parse_fulltext(path):
     """
     Return the annotations of sentences that contain at least one manual annotation
     
     It's something like:
-    [(sentence_words, [annotation1, anntatation2]), (....), (....)]
+    [(sentence_string, [annotation1, anntatation2]), (....), (....)]
     
-    >>> result = parse_fulltext("test_data/annotation1.xml")
+    >>> result = parse_fulltext("test_data/annotation.xml")
     >>> len(result)
     1
     >>> len(result[0])
@@ -26,7 +56,7 @@ def parse_fulltext(path):
     Annotation(frame_name='Purpose', target=Target(start=35, end=38), FE=[FrameElement(start=0, end=28, name='Means'), FrameElement(start=40, end=61, name='Value')])
     """
     tree = etree.parse(path, parser)
-
+    tree=transform(tree) # remove namespace
     result = []
     for sent in tree.xpath('sentence'):
         sent_str = sent.xpath('text')[0].text.decode('utf8')
@@ -49,6 +79,10 @@ def parse_fulltext(path):
             annotations.append(annotation)
         if len(annotations) > 0: # only those with annotations
             result.append((sent_str, annotations))
+
+    if len(result) == 0:
+        sys.stderr.write("WARNING: no result found for %s" %(path))
+
     return result
 
             
