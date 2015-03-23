@@ -1,7 +1,10 @@
 from nltk.stem import PorterStemmer
 
 from ling_util import get_head_word
-from data import (Context, Frame, NodePosition)
+
+
+class FeatureExtractionFail(Exception):
+    pass
 
 class Feature(object):
     @classmethod
@@ -11,7 +14,7 @@ class Feature(object):
 class Position(Feature):
     """
     >>> from nltk.tree import Tree
-    >>> from data import (Context, Frame, NodePosition)
+    >>> from basic_struct import (Frame, NodePosition, Context)
     >>> tree = Tree('ROOT', [Tree('S', [Tree('NP', [Tree('NP', [Tree('PRP$', ['Your']), Tree('NN', ['contribution'])]), Tree('PP', [Tree('TO', ['to']), Tree('NP', [Tree('NNP', ['Goodwill'])])])]), Tree('VP', [Tree('MD', ['will']), Tree('VP', [Tree('VB', ['mean']), Tree('ADVP', [Tree('ADVP', [Tree('RBR', ['more'])]), Tree('SBAR', [Tree('IN', ['than']), Tree('S', [Tree('NP', [Tree('PRP', ['you'])]), Tree('VP', [Tree('MD', ['may']), Tree('VP', [Tree('VB', ['know'])])])])])])])]), Tree('.', ['.'])])])
     >>> sent = u'Your contribution to Goodwill will mean more than you may know .'
     >>> Position.get_value(tree[0][0][0][0], Context(sent, tree, Frame(start=5, end=16, name='Giving'), NodePosition(0, 3)))
@@ -45,7 +48,7 @@ class Position(Feature):
 class PathToFrame(Feature):
     """
     >>> from nltk.tree import Tree
-    >>> from data import (Context, Frame, NodePosition)
+    >>> from basic_struct import (Frame, NodePosition, Context)
     >>> tree = Tree('ROOT', [Tree('S', [Tree('NP', [Tree('NP', [Tree('PRP$', ['Your']), Tree('NN', ['contribution'])]), Tree('PP', [Tree('TO', ['to']), Tree('NP', [Tree('NNP', ['Goodwill'])])])]), Tree('VP', [Tree('MD', ['will']), Tree('VP', [Tree('VB', ['mean']), Tree('ADVP', [Tree('ADVP', [Tree('RBR', ['more'])]), Tree('SBAR', [Tree('IN', ['than']), Tree('S', [Tree('NP', [Tree('PRP', ['you'])]), Tree('VP', [Tree('MD', ['may']), Tree('VP', [Tree('VB', ['know'])])])])])])])]), Tree('.', ['.'])])])
     >>> sent = u'Your contribution to Goodwill will mean more than you may know .'
     >>> PathToFrame.get_value(tree[0][0][0][0], Context(sent, tree, Frame(start=5, end=16, name='Giving'), NodePosition(0, 3))) # your
@@ -54,6 +57,12 @@ class PathToFrame(Feature):
     ('TO', 'u', 'PP', 'u', 'NP', 'd', 'NP', 'd', 'NN')
     >>> PathToFrame.get_value(tree[0][0][0][1], Context(sent, tree, Frame(start=5, end=16, name='Giving'), NodePosition(35, 38))) #mean
     ('VB', 'u', 'VP', 'u', 'VP', 'u', 'S', 'd', 'NP', 'd', 'NP', 'd', 'NN')
+    >>> PathToFrame.get_value(tree[0][0][0][0], Context(sent, tree, Frame(start=0, end=3, name=''), NodePosition(0, 3))) # frame is node
+    ('PRP$',)
+    >>> PathToFrame.get_value(tree[0][0][0][0], Context(sent, tree, Frame(start=0, end=28, name=''), NodePosition(0, 3))) # frame is the parent
+    ('PRP$', 'u', 'NP', 'u', 'NP')
+    >>> PathToFrame.get_value(tree[0][0], Context(sent, tree, Frame(start=0, end=3, name=''), NodePosition(0, 28))) # node is the parent
+    ('NP', 'd', 'NP', 'd', 'PRP$')
     """
     name = 'path_to_frame'
 
@@ -70,12 +79,14 @@ class PathToFrame(Feature):
                 break
             cur += (len(w)+1)
 
-        assert start is not None
-        assert end is not None
+        if start == None or end == None:
+            raise FeatureExtractionFail('Cannot extract the path at %r for "%s"' %((char_start, char_end), sent))
         return start, end
     
     @classmethod
     def get_value(cls, u, c):
+        # print u, c.node_pos.start, c.node_pos.end
+        # print c.frame
         #from root to source node
         start, end = cls.get_word_index_range(c.sentence, c.node_pos.start, c.node_pos.end)
         path1 = c.parse_tree.treeposition_spanning_leaves(start, end)
@@ -84,29 +95,33 @@ class PathToFrame(Feature):
         start, end = cls.get_word_index_range(c.sentence, c.frame.start, c.frame.end)
         path2 = c.parse_tree.treeposition_spanning_leaves(start, end)
         
-        #find their lowest common ancestor
-        i = 0
-        lca = c.parse_tree
-        while path1[i] == path2[i]:
-            lca = lca[path1[i]]
-            i += 1
+        if path1 == path2:
+            return (u.label(),)
+        else:
+            #find their lowest common ancestor
+            i = 0
+            lca = c.parse_tree
+            max_steps = min(len(path1),len(path2))
+            while i < max_steps and path1[i] == path2[i]:
+                lca = lca[path1[i]]
+                i += 1
 
-        steps = [lca.label()]
-        # source node to LCA
-        node = lca
-        for ind in path1[i:-1]: #ignore the leaf node, so -1
-            steps.insert(0, 'u')
-            node = node[ind]
-            steps.insert(0, node.label())
+            steps = [lca.label()]
+            # source node to LCA
+            node = lca
+            for ind in path1[i:-1]: #ignore the leaf node, so -1
+                steps.insert(0, 'u')
+                node = node[ind]
+                steps.insert(0, node.label())
 
-        # LCA to frame node
-        node = lca
-        for ind in path2[i:-1]: #ignore the leaf node, so -1
-            steps.append('d')
-            node = node[ind]
-            steps.append(node.label())
+            # LCA to frame node
+            node = lca
+            for ind in path2[i:-1]: #ignore the leaf node, so -1
+                steps.append('d')
+                node = node[ind]
+                steps.append(node.label())
 
-        return tuple(steps)
+            return tuple(steps)
 
 class PhraseType(Feature):
     """
@@ -134,6 +149,8 @@ class HeadWordStem(Feature):
     @classmethod
     def get_value(cls, u, c):
         head_word = get_head_word(u)
+        if head_word == None:
+            print u
         return cls.stemmer.stem(head_word)
 
 class Voice(Feature):
@@ -142,6 +159,7 @@ class Voice(Feature):
         pass
 
 class Frame(Feature):
+    name = "frame"
     @classmethod
     def get_value(cls, u, c):
         return c.frame.name
@@ -169,3 +187,8 @@ class BarFeature(object):
     @classmethod
     def get_value(cls, u, c):
         return "bar"
+
+
+ALL_FEATURES = (Position, 
+                # PathToFrame, # tricky one
+                PhraseType, HeadWordStem, Frame)

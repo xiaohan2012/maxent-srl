@@ -54,6 +54,13 @@ def parse_fulltext(path):
     Annotation(frame_name='Giving', target=Target(start=5, end=16), FE=[FrameElement(start=0, end=3, name='Donor'), FrameElement(start=18, end=28, name='Recipient')])
     >>> result[0][1][1]
     Annotation(frame_name='Purpose', target=Target(start=35, end=38), FE=[FrameElement(start=0, end=28, name='Means'), FrameElement(start=40, end=61, name='Value')])
+    
+    # for DNI etc cases
+    >>> result = parse_fulltext("test_data/annotation_dni.xml")
+    >>> result[0][1][0]
+    Annotation(frame_name='Importance', target=Target(start=60, end=63), FE=[FrameElement(start=65, end=70, name='Factor')])
+    >>> result[0][1][1]
+    Annotation(frame_name='Rewards_and_punishments', target=Target(start=154, end=163), FE=[])
     """
     tree = etree.parse(path, parser)
     tree=transform(tree) # remove namespace
@@ -62,16 +69,25 @@ def parse_fulltext(path):
         sent_str = sent.xpath('text')[0].text.decode('utf8')
         annotations = []
         for a in sent.xpath('annotationSet[@status="MANUAL"]'):
-            target_node = a.xpath('layer[@name="Target"]/label')[0]
+            target_label = a.xpath('layer[@name="Target"]/label')
+            if len(target_label) == 1:
+                target_node = target_label[0]
+            else:
+                continue
+                
             target = Target(start = int(target_node.attrib['start']),
                             end = int(target_node.attrib['end']))
             
             FE = []
-            for label in a.xpath('layer[@name="FE"]/label'):
-                FE.append(FrameElement(start = int(label.attrib['start']), 
-                                        end = int(label.attrib['end']), 
-                                        name = label.attrib['name']))
-            assert len(FE) > 0
+            for label in a.xpath('layer[@name="FE"]/label[not(@itype)] '): # exclude null instantiation ones
+                if 'start' in label.attrib: # if it has `start` key
+                    FE.append(FrameElement(start = int(label.attrib['start']), 
+                                           end = int(label.attrib['end']), 
+                                           name = label.attrib['name']))
+
+            if len(FE) == 0:
+                sys.stderr.write('No valid FrameElement found in\n %s' %(a))
+
             annotation = Annotation(frame_name = a.attrib['frameName'], 
                                     target = target, 
                                     FE = FE)

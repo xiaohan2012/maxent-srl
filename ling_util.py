@@ -1,13 +1,14 @@
 """
 Linguistic utility functions
 """
-
+from nltk.tree import Tree
+\
 rules = {
     'ADJP': ('right',  set(('%', 'QP', 'JJ', 'VBN', 'VBG', 'ADJP', '$', 'JJR', 'JJS', 'DT', 'FW', '****', 'RBR', 'RBS', 'RB',))),
     'ADVP': ('left', set(('RBR', 'RB', 'RBS', 'FW', 'ADVP', 'CD', '****', 'JJR', 'JJS', 'JJ',))),
     'CONJP': ('left', set(('CC', 'RB', 'IN',))),
-    'FRAG': ('left', set(('**',))),
-    'INTJ': ('right',  set(('**',))),
+    'FRAG': ('left', '**'),
+    'INTJ': ('right', '**'),
     'LST': ('left', set(('LS', ))),
     'NAC': ('right',  set(('NN', 'NNS', 'NNP', 'NNPS', 'NP', 'NAC', 'EX', '$', 'CD', 'QP', 'PRP', 'VBG', 'JJ', 'JJS', 'JJR', 'ADJP', 'FW',))),
     'NP': ('right',  set(('EX', '$', 'CD', 'QP', 'PRP', 'VBG', 'JJ', 'JJS', 'JJR', 'ADJP', 'DT', 'FW', 'RB', 'SYM', 'PRP$',))),
@@ -32,9 +33,8 @@ rules = {
     'X': ('left', set(('**',))),
 }
 
-def get_head_word(node, sensitive = True):
+def get_head_word(node):
     """
-    if `sensitive` is set to True, then node without any head word will not be reported as Exception
     Reference:
     - http://people.csail.mit.edu/mcollins/papers/heads       (method one)
     
@@ -51,11 +51,14 @@ def get_head_word(node, sensitive = True):
     'will'
     >>> get_head_word(tree[0][1][1][1][1])
     'may'
-    >>> get_head_word(tree) # doctest: +IGNORE_EXCEPTION_DETAIL    
-    Traceback (most recent call last):
-    KeyError: "No rule for label...
-    >>> print get_head_word(tree, sensitive = False)
-    None
+    >>> tree = Tree('NP', [Tree('NP', [Tree('DT', ['an']), Tree('NN', ['employment']), Tree('NN', ['contract'])]), Tree('PP', [Tree('IN', ['between']), Tree('NP', [Tree('NP', [Tree('NNP', ['AL']), Tree('NNP', ['QAEDA'])]), Tree('CC', ['and']), Tree('NP', [Tree('DT', ['a']), Tree('JJ', ['potential']), Tree('NN', ['recruit'])])])])]) # no specific rule case
+    >>> get_head_word(tree)
+    'between'
+
+    # test for ** cases
+    >>> tree = Tree('ROOT', [Tree('FRAG', [Tree('PP', [Tree('IN', ['In']), Tree('NP', [Tree('NP', [Tree('DT', ['the']), Tree('NN', ['name'])]), Tree('PP', [Tree('IN', ['of']), Tree('NP', [Tree('NP', [Tree('NNP', ['Allah'])]), Tree(',', [',']), Tree('NP', [Tree('JJS', ['Most']), Tree('NNS', ['Gracious'])]), Tree(',', [','])])])])]), Tree('NP', [Tree('NP', [Tree('JJS', ['Most'])]), Tree('NP', [Tree('NP', [Tree('NNP', ['Merciful']), Tree('.', ['.'])]), Tree('PRN', [Tree('-LRB-', ['-LRB-']), Tree('NP', [Tree('NP', [Tree('NNP', ['T.C'])]), Tree(':', [':']), Tree('NP', [Tree('NP', [Tree('NN', ['verse'])]), Tree('PP', [Tree('IN', ['from']), Tree('NP', [Tree('DT', ['the']), Tree('NNP', ['Koran'])])])])]), Tree('-RRB-', ['-RRB-'])])])])])])
+    >>> get_head_word(tree[0])
+    'In'
     """
     if len(node) == 1 and isinstance(node[0], basestring):
         return node[0]
@@ -64,6 +67,7 @@ def get_head_word(node, sensitive = True):
             # NNP does not exist?
             if node[-1].label().startswith('N'):
                 return get_head_word(node[-1])
+
         label = node.label()
         if label in rules:
             rule = rules[label]
@@ -73,13 +77,37 @@ def get_head_word(node, sensitive = True):
                 iters = node
             else:
                 iters = node[::-1]
-            
-            for child in iters:
-                if child.label() in label_values:
-                    return get_head_word(child)
-        else:
-            if sensitive:
-                raise KeyError("No rule for label '%s'" %(label))
+            if label_values == "**":
+                return get_head_word(iters[0])
             else:
-                return None
-        raise ValueError("No head word for %r" %(node))
+                for child in iters:
+                    if child.label() in label_values:
+                        return get_head_word(child)
+
+            #not found, use the one by `direction`
+            if direction == 'left':
+                return get_head_word(node[0])
+            else:
+                return get_head_word(node[-1])
+
+
+
+mapping = dict(zip('-LRB- -RRB- -RSB- -RSB- -LCB- -RCB-'.split(), '( ) [ ] { }'.split()))
+
+def convert_brackets(tree):
+    """convert the bracket notation back to the original
+
+    >>> t = Tree('FRAG', [Tree('PP', [Tree('IN', ['In']), Tree('NP', [Tree('NP', [Tree('DT', ['the']), Tree('NN', ['name'])]), Tree('PP', [Tree('IN', ['of']), Tree('NP', [Tree('NP', [Tree('NNP', ['Allah'])]), Tree(',', [',']), Tree('NP', [Tree('JJS', ['Most']), Tree('NNS', ['Gracious'])]), Tree(',', [','])])])])]), Tree('NP', [Tree('NP', [Tree('JJS', ['Most'])]), Tree('NP', [Tree('NP', [Tree('NNP', ['Merciful']), Tree('.', ['.'])]), Tree('PRN', [Tree('-LRB-', ['-LRB-']), Tree('NP', [Tree('NP', [Tree('NNP', ['T.C'])]), Tree(':', [':']), Tree('NP', [Tree('NP', [Tree('NN', ['verse'])]), Tree('PP', [Tree('IN', ['from']), Tree('NP', [Tree('DT', ['the']), Tree('NNP', ['Koran'])])])])]), Tree('-RRB-', ['-RRB-'])])])])])
+    >>> convert_brackets(t)
+    Tree('FRAG', [Tree('PP', [Tree('IN', ['In']), Tree('NP', [Tree('NP', [Tree('DT', ['the']), Tree('NN', ['name'])]), Tree('PP', [Tree('IN', ['of']), Tree('NP', [Tree('NP', [Tree('NNP', ['Allah'])]), Tree(',', [',']), Tree('NP', [Tree('JJS', ['Most']), Tree('NNS', ['Gracious'])]), Tree(',', [','])])])])]), Tree('NP', [Tree('NP', [Tree('JJS', ['Most'])]), Tree('NP', [Tree('NP', [Tree('NNP', ['Merciful']), Tree('.', ['.'])]), Tree('PRN', [Tree('-LRB-', ['(']), Tree('NP', [Tree('NP', [Tree('NNP', ['T.C'])]), Tree(':', [':']), Tree('NP', [Tree('NP', [Tree('NN', ['verse'])]), Tree('PP', [Tree('IN', ['from']), Tree('NP', [Tree('DT', ['the']), Tree('NNP', ['Koran'])])])])]), Tree('-RRB-', [')'])])])])])
+    """
+    def aux(t):
+        if isinstance(t, basestring):
+            if t in mapping:
+                return mapping[t]
+            else:
+                return t
+        else:
+            return Tree(t.label(), [convert_brackets(subtree) for subtree in t])
+            
+    return aux(tree)

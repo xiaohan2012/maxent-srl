@@ -2,16 +2,18 @@ from nltk.tree import Tree
 
 def collect_nodes(tree):
     """
-    collect all the nodes from the tree
+    Collect all the nodes as well as thei char position ranges from the tree
+
+    The root is ecluded
 
     >>> from nltk.tree import Tree
     >>> tree = Tree('ROOT', [Tree('S', [Tree('NP', [Tree('PRP', ['I'])]), Tree('VP', [Tree('VBP', ['love']), Tree('NP', [Tree('PRP', ['you'])])])])])
     >>> node_info = collect_nodes(tree)
     >>> nodes = [n for n,pos in node_info]
     >>> len(nodes)
-    8
+    7
     >>> tree in nodes
-    True
+    False
     >>> tree[0] in nodes
     True
     >>> tree[0][1]
@@ -25,7 +27,7 @@ def collect_nodes(tree):
     >>> 'I' in nodes
     False
     >>> node_info
-    [(Tree('PRP', ['I']), (0, 0)), (Tree('NP', [Tree('PRP', ['I'])]), (0, 0)), (Tree('VBP', ['love']), (2, 5)), (Tree('PRP', ['you']), (7, 9)), (Tree('NP', [Tree('PRP', ['you'])]), (7, 9)), (Tree('VP', [Tree('VBP', ['love']), Tree('NP', [Tree('PRP', ['you'])])]), (2, 9)), (Tree('S', [Tree('NP', [Tree('PRP', ['I'])]), Tree('VP', [Tree('VBP', ['love']), Tree('NP', [Tree('PRP', ['you'])])])]), (0, 9)), (Tree('ROOT', [Tree('S', [Tree('NP', [Tree('PRP', ['I'])]), Tree('VP', [Tree('VBP', ['love']), Tree('NP', [Tree('PRP', ['you'])])])])]), (0, 9))]
+    [(Tree('PRP', ['I']), (0, 0)), (Tree('NP', [Tree('PRP', ['I'])]), (0, 0)), (Tree('VBP', ['love']), (2, 5)), (Tree('PRP', ['you']), (7, 9)), (Tree('NP', [Tree('PRP', ['you'])]), (7, 9)), (Tree('VP', [Tree('VBP', ['love']), Tree('NP', [Tree('PRP', ['you'])])]), (2, 9)), (Tree('S', [Tree('NP', [Tree('PRP', ['I'])]), Tree('VP', [Tree('VBP', ['love']), Tree('NP', [Tree('PRP', ['you'])])])]), (0, 9))]
     """
     assert isinstance(tree, Tree)
     def aux(subtree, acc, start):
@@ -40,12 +42,13 @@ def collect_nodes(tree):
                 start_offset += (length+1) # one space
             acc.append((subtree, (start, start_offset-2)))
     nodes = []
-    aux(tree, nodes, 0)
+    assert len(tree) == 1
+    aux(tree[0], nodes, 0)
     return nodes
 
 def find_node_by_positions(tree, start, end):
     """
-    Given the start/end(inclusive) index of the text string, find the corresponding node in the tree
+    Given the start/end(inclusive) index of the text string(' '.join(tree.leaves())), find the corresponding node in the tree
 
     Time complexity: O(height of the tree)
     
@@ -57,9 +60,13 @@ def find_node_by_positions(tree, start, end):
     None
     >>> find_node_by_positions(tree, 40, 61) # more than you may know
     Tree('ADVP', [Tree('ADVP', [Tree('RBR', ['more'])]), Tree('SBAR', [Tree('IN', ['than']), Tree('S', [Tree('NP', [Tree('PRP', ['you'])]), Tree('VP', [Tree('MD', ['may']), Tree('VP', [Tree('VB', ['know'])])])])])])
+    
+    # more tests
+    >>> tree = Tree('ROOT', [Tree('S', [Tree('NP', [Tree('DT', ['This'])]), Tree('VP', [Tree('VBZ', ['is']), Tree('NP', [Tree('NP', [Tree('DT', ['an']), Tree('NN', ['employment']), Tree('NN', ['contract'])]), Tree('PP', [Tree('IN', ['between']), Tree('NP', [Tree('NP', [Tree('NNP', ['AL']), Tree('NNP', ['QAEDA'])]), Tree('CC', ['and']), Tree('NP', [Tree('DT', ['a']), Tree('JJ', ['potential']), Tree('NN', ['recruit'])])])])])]), Tree('.', ['.'])])])
+    >>> find_node_by_positions(tree, 22, 29)
+    Tree('NN', ['contract'])
     """
-    assert start >= 0 and start <= end, "Invalid range"
-    end = end+1 # because of Python slicing rules(exclusive)
+    assert start >= 0 and start <= end, "Invalid range %r" %((start, end), )
 
     # Binary search for the target range
     tree = tree[0]# we don't consider the root
@@ -67,18 +74,23 @@ def find_node_by_positions(tree, start, end):
     tree_word_length = lambda t: len(' '.join(t.leaves()))
     
     while True:
-        if offset == start and start + tree_word_length(tree) == end:
+        if offset == start and start + tree_word_length(tree) - 1 == end:
             return tree
         else:
-            left_tree, right_tree = tree[0], tree[1]
-            left_range_start, left_range_end = offset, offset + tree_word_length(left_tree)
-            right_range_start, right_range_end = left_range_end + 1, left_range_end + 1 + tree_word_length(right_tree)
-
-            if start >= left_range_start and end <= left_range_end:
-                tree = left_tree
-            elif start >= right_range_start and end <= right_range_end:
-                tree = right_tree
-                offset = right_range_start
-            else:
+            found_range = False
+            subtree_start = offset
+            for subtree in tree:
+                subtree_end = subtree_start + tree_word_length(subtree) - 1
+                if start >= subtree_start and end <= subtree_end:
+                    found_range = True
+                    offset = subtree_start
+                    tree = subtree
+                    break
+                else:
+                    subtree_start = subtree_end + 2
+                    tree = subtree
+            if not found_range:
                 # the target range lies in the intersection between the two subtrees
                 return None
+
+    

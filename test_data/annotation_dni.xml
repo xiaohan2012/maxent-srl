@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<?xml-stylesheet type="text/xsl" href="fullText.xsl"?>
+<fullTextAnnotation xsi:schemaLocation="../schema/fullText.xsd" xmlns="http://framenet.icsi.berkeley.edu" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <header>
+    <corpus name="LUCorpus-v0.3" ID="204">
+      <document description="AFGP-2002-600045-Trans" ID="721"/>
+    </corpus>
+  </header>
+  <sentence corpID="204" docID="721" sentNo="2" paragNo="4" aPos="0" ID="1278414">
+	<text>It contains a definition of AL QAEDA organization , and six main points : 1-Duties ; 2-Holidays ; 3-Salaries and Travel tickets ; 4-Advice ; 5-Reward and Punishment ; 6-Pledge .</text>
+	<annotationSet cDate="11/06/2007 03:41:56 PST Tue" luID="13875" luName="main.a" frameID="407" frameName="Importance" status="MANUAL" ID="2018465">
+      <layer rank="1" name="Target">
+		<label cBy="597" end="63" start="60" name="Target"/>
+      </layer>
+      <layer rank="1" name="FE">
+		<label cBy="597" feID="3749" bgColor="FF0000" fgColor="FFFFFF" end="70" start="65" name="Factor"/>
+		<label cBy="597" feID="3771" itype="DNI" bgColor="800080" fgColor="FFFFFF" name="Interested_party"/>
+      </layer>
+      <layer rank="1" name="GF">
+		<label end="70" start="65" name="Head"/>
+      </layer>
+      <layer rank="1" name="PT">
+		<label end="70" start="65" name="N"/>
+      </layer>
+      <layer rank="1" name="Other"/>
+      <layer rank="1" name="Sent"/>
+      <layer rank="1" name="Adj"/>
+	</annotationSet>
+	<annotationSet cDate="11/06/2007 03:44:47 PST Tue" luID="3854" luName="punishment_penalty.n" frameID="216" frameName="Rewards_and_punishments" status="MANUAL" ID="2018466">
+      <layer rank="1" name="Target">
+        <label cBy="597" end="163" start="154" name="Target"/>
+      </layer>
+      <layer rank="1" name="FE">
+        <label cBy="597" feID="1758" itype="DNI" bgColor="0000FF" fgColor="FFFFFF" name="Evaluee"/>
+        <label cBy="597" feID="1766" itype="DNI" bgColor="FF0000" fgColor="FFFFFF" name="Agent"/>
+      </layer>
+      <layer rank="1" name="GF"/>
+      <layer rank="1" name="PT"/>
+      <layer rank="1" name="Other"/>
+      <layer rank="1" name="Sent"/>
+      <layer rank="1" name="Noun"/>
+    </annotationSet>
+  </sentence>
+</fullTextAnnotation>

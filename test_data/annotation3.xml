@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<?xml-stylesheet type="text/xsl" href="fullText.xsl"?>
+<fullTextAnnotation xsi:schemaLocation="../schema/fullText.xsd" xmlns="http://framenet.icsi.berkeley.edu" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <header>
+    <corpus name="KBEval" ID="184">
+      <document description="atm" ID="558"/>
+    </corpus>
+  </header>
+  <sentence corpID="204" docID="721" sentNo="1" paragNo="7" aPos="0" ID="1278419">
+    <text>Objectives of AL QAEDA: Support God 's religion , establishment of Islamic rule , and restoration of the Islamic Caliphate , God willing .</text>
+    <annotationSet cDate="08/24/2007 01:46:49 PDT Fri" status="UNANN" ID="2015187">
+      <layer rank="1" name="PENN">
+        <label end="9" start="0" name="nns"/>
+        <label end="12" start="11" name="in"/>
+        <label end="15" start="14" name="NP"/>
+        <label end="22" start="17" name="NP"/>
+        <label end="30" start="24" name="VVP"/>
+        <label end="34" start="32" name="NP"/>
+        <label end="37" start="36" name="POS"/>
+        <label end="46" start="39" name="nn"/>
+        <label end="48" start="48" name=","/>
+        <label end="62" start="50" name="nn"/>
+        <label end="65" start="64" name="in"/>
+        <label end="73" start="67" name="jj"/>
+        <label end="78" start="75" name="nn"/>
+        <label end="80" start="80" name=","/>
+        <label end="84" start="82" name="cc"/>
+        <label end="96" start="86" name="nn"/>
+        <label end="99" start="98" name="in"/>
+        <label end="103" start="101" name="dt"/>
+        <label end="111" start="105" name="jj"/>
+        <label end="121" start="113" name="nn"/>
+        <label end="123" start="123" name=","/>
+        <label end="127" start="125" name="NP"/>
+        <label end="135" start="129" name="jj"/>
+        <label end="137" start="137" name="sent"/>
+      </layer>
+      <layer rank="1" name="NER">
+        <label end="36" start="14" name="organization"/>
+      </layer>
+      <layer rank="1" name="WSL">
+        <label end="12" start="11" name="NT"/>
+        <label end="15" start="14" name="NT"/>
+        <label end="22" start="17" name="NT"/>
+        <label end="34" start="32" name="NT"/>
+        <label end="37" start="36" name="NT"/>
+        <label end="48" start="48" name="NT"/>
+        <label end="65" start="64" name="NT"/>
+        <label end="80" start="80" name="NT"/>
+        <label end="84" start="82" name="NT"/>
+        <label end="99" start="98" name="NT"/>
+        <label end="103" start="101" name="NT"/>
+        <label end="123" start="123" name="NT"/>
+        <label end="127" start="125" name="NT"/>
+        <label end="137" start="137" name="NT"/>
+      </layer>
+    </annotationSet>
+    <annotationSet cDate="11/07/2007 04:38:20 PST Wed" luID="8050" luName="objective.n" frameID="513" frameName="Purpose" status="MANUAL" ID="2018592">
+      <layer rank="1" name="Target">
+        <label cBy="597" end="9" start="0" name="Target"/>
+      </layer>
+      <layer rank="1" name="FE">
+        <label cBy="597" feID="4085" bgColor="FF0000" fgColor="FFFFFF" end="22" start="11" name="Agent"/>
+        <label cBy="597" feID="4086" itype="DNI" bgColor="008000" fgColor="FFFFFF" name="Goal"/>
+        <label cBy="597" feID="4410" itype="INI" bgColor="00BFFF" fgColor="FFFFFF" name="Attribute"/>
+      </layer>
+      <layer rank="1" name="GF">
+        <label end="22" start="11" name="Dep"/>
+      </layer>
+      <layer rank="1" name="PT">
+        <label end="22" start="11" name="PP"/>
+      </layer>
+      <layer rank="1" name="Other"/>
+      <layer rank="1" name="Sent"/>
+      <layer rank="1" name="Noun"/>
+    </annotationSet>
+    <annotationSet cDate="11/07/2007 04:38:23 PST Wed" luID="11501" luName="support.v" frameID="1306" frameName="Taking_sides" status="MANUAL" ID="2018593">
+      <layer rank="1" name="Target">
+        <label cBy="597" end="30" start="24" name="Target"/>
+      </layer>
+      <layer rank="1" name="FE">
+        <label cBy="597" feID="7434" bgColor="008000" fgColor="FFFFFF" end="46" start="32" name="Issue"/>
+        <label cBy="597" feID="7433" itype="DNI" bgColor="FF0000" fgColor="FFFFFF" name="Cognizer"/>
+      </layer>
+      <layer rank="1" name="GF">
+        <label end="46" start="32" name="Dep"/>
+      </layer>
+      <layer rank="1" name="PT">
+        <label end="46" start="32" name="NP"/>
+      </layer>
+      <layer rank="1" name="Other"/>
+      <layer rank="1" name="Sent"/>
+      <layer rank="1" name="Verb"/>
+      <layer rank="2" name="FE">
+        <label cBy="597" feID="7435" bgColor="0000FF" fgColor="FFFFFF" end="34" start="32" name="Side"/>
+        <label cBy="597" feID="7433" itype="DNI" bgColor="FF0000" fgColor="FFFFFF" name="Cognizer"/>
+      </layer>
+    </annotationSet>
+    <annotationSet cDate="11/07/2007 04:38:31 PST Wed" luID="11433" luName="establishment.n" frameID="280" frameName="Intentionally_create" status="MANUAL" ID="2018594">
+      <layer rank="1" name="Target">
+        <label cBy="597" end="62" start="50" name="Target"/>
+      </layer>
+      <layer rank="1" name="FE">
+        <label cBy="597" feID="2423" bgColor="0000FF" fgColor="FFFFFF" end="78" start="64" name="Created_entity"/>
+        <label cBy="597" feID="2417" itype="DNI" bgColor="FF0000" fgColor="FFFFFF" name="Creator"/>
+      </layer>
+      <layer rank="1" name="GF">
+        <label end="78" start="64" name="Dep"/>
+      </layer>
+      <layer rank="1" name="PT">
+        <label end="78" start="64" name="PP"/>
+      </layer>
+      <layer rank="1" name="Other"/>
+      <layer rank="1" name="Sent"/>
+      <layer rank="1" name="Noun"/>
+    </annotationSet>
+    <annotationSet cDate="11/07/2007 04:38:36 PST Wed" luID="13654" luName="rule.n" frameID="73" frameName="Leadership" status="MANUAL" ID="2018595">
+      <layer rank="1" name="Target">
+        <label cBy="597" end="78" start="75" name="Target"/>
+      </layer>
+      <layer rank="1" name="FE">
+        <label cBy="597" feID="347" bgColor="FF0000" fgColor="FFFFFF" end="73" start="67" name="Leader"/>
+      </layer>
+      <layer rank="1" name="GF">
+        <label end="73" start="67" name="Dep"/>
+      </layer>
+      <layer rank="1" name="PT">
+        <label end="73" start="67" name="AJP"/>
+      </layer>
+      <layer rank="1" name="Other"/>
+      <layer rank="1" name="Sent"/>
+      <layer rank="1" name="Noun"/>
+    </annotationSet>
+    <annotationSet cDate="11/07/2007 04:38:52 PST Wed" luID="12799" luName="willing.a" frameID="1632" frameName="Willingness" status="MANUAL" ID="2018596">
+      <layer rank="1" name="Target">
+        <label cBy="597" end="135" start="129" name="Target"/>
+      </layer>
+      <layer rank="1" name="FE">
+        <label cBy="597" feID="9096" bgColor="FF0000" fgColor="FFFFFF" end="127" start="125" name="Cognizer"/>
+        <label cBy="597" feID="9097" itype="DNI" bgColor="0000FF" fgColor="FFFFFF" name="Activity"/>
+      </layer>
+      <layer rank="1" name="GF">
+        <label end="127" start="125" name="Ext"/>
+      </layer>
+      <layer rank="1" name="PT">
+        <label end="127" start="125" name="NP"/>
+      </layer>
+      <layer rank="1" name="Other"/>
+      <layer rank="1" name="Sent"/>
+      <layer rank="1" name="Adj"/>
+    </annotationSet>
+  </sentence>
+</fullTextAnnotation>
