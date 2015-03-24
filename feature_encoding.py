@@ -27,7 +27,7 @@ def encode(data_features, features):
             mapping[name][value] = acc
             acc+=1
 
-    data = csr_matrix((len(data_features), acc), dtype='i') # indicator variable, so to integer
+    data = lil_matrix((len(data_features), acc), dtype='i') # indicator variable, so to integer
     for i, features in enumerate(data_features):
         for key, value in features.items():
             if key in mapping and value in mapping[key]:
