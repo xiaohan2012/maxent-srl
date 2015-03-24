@@ -1,4 +1,4 @@
-import numpy as np
+from scipy.sparse import (lil_matrix, csr_matrix)
 from collections import defaultdict
 
 def encode(data_features, features):
@@ -7,16 +7,16 @@ def encode(data_features, features):
     features: the selected features
 
     Return:
-    1. np.array(2d) of the encoded data
+    1. scipy.sparse.lil_matrix(2d) of the encoded data
     2. feature_value to column index mapping
 
     >>> data_features = [{'a': 1, 'b': 1}, {'a': 2, 'b': 2}, {'a': 3, 'b': 3}]
     >>> features = {'a': set([1, 2]), 'b': set([1])}
     >>> data, mapping = encode(data_features, features)
-    >>> data
-    array([[ 1.,  0.,  1.],
-           [ 0.,  1.,  0.],
-           [ 0.,  0.,  0.]])
+    >>> print data #doctest: +NORMALIZE_WHITESPACE
+      (0, 0)	1
+      (0, 2)	1
+      (1, 1)	1
     >>> mapping
     defaultdict(<type 'dict'>, {'a': {1: 0, 2: 1}, 'b': {1: 2}})
     """
@@ -27,11 +27,15 @@ def encode(data_features, features):
             mapping[name][value] = acc
             acc+=1
 
-    data = np.zeros((len(data_features), acc))
-
-    for row, features in zip(data, data_features):
+    data = csr_matrix((len(data_features), acc), dtype='i') # indicator variable, so to integer
+    for i, features in enumerate(data_features):
         for key, value in features.items():
             if key in mapping and value in mapping[key]:
-                row[mapping[key][value]] = 1
-    return data, mapping
+                data[i,mapping[key][value]] = 1
+
+    # for row, features in zip(data, data_features):
+    #     for key, value in features.items():
+    #         if key in mapping and value in mapping[key]:
+    #             row[mapping[key][value]] = 1
+    return csr_matrix(data), mapping
     

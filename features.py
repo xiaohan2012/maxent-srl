@@ -190,5 +190,5 @@ class BarFeature(object):
 
 
 ALL_FEATURES = (Position, 
-                # PathToFrame, # tricky one
+                PathToFrame, # tricky one
                 PhraseType, HeadWordStem, Frame)
