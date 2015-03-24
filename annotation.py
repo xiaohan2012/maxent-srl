@@ -1,7 +1,14 @@
 import sys, io
+import codecs
 from lxml import etree
 from collections import namedtuple
-Annotation = namedtuple('Annotation', ['frame_name', 'target', 'FE'])
+from pathlib import Path
+try:
+    import cPickle as pickle 
+except ImportError:
+    import pickle
+
+Annotation = namedtuple('Annotation', ['id', 'sent_id', 'frame_name', 'target', 'FE'])
 Target = namedtuple('Target', ['start', 'end'])
 FrameElement = namedtuple('FrameElement', ['start', 'end', 'name'])
 
@@ -35,6 +42,7 @@ xslt="""<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Tran
 
 xslt_doc=etree.parse(io.BytesIO(xslt))
 transform=etree.XSLT(xslt_doc)
+
     
 def parse_fulltext(path):
     """
@@ -51,24 +59,26 @@ def parse_fulltext(path):
     >>> result[0][0]
     u'Your contribution to Goodwill will mean more than you may know .'
     >>> result[0][1][0]
-    Annotation(frame_name='Giving', target=Target(start=5, end=16), FE=[FrameElement(start=0, end=3, name='Donor'), FrameElement(start=18, end=28, name='Recipient')])
+    Annotation(id='2024608', sent_id='1281539', frame_name='Giving', target=Target(start=5, end=16), FE=[FrameElement(start=0, end=3, name='Donor'), FrameElement(start=18, end=28, name='Recipient')])
     >>> result[0][1][1]
-    Annotation(frame_name='Purpose', target=Target(start=35, end=38), FE=[FrameElement(start=0, end=28, name='Means'), FrameElement(start=40, end=61, name='Value')])
+    Annotation(id='2024610', sent_id='1281539', frame_name='Purpose', target=Target(start=35, end=38), FE=[FrameElement(start=0, end=28, name='Means'), FrameElement(start=40, end=61, name='Value')])
     
     # for DNI etc cases
     >>> result = parse_fulltext("test_data/annotation_dni.xml")
     >>> result[0][1][0]
-    Annotation(frame_name='Importance', target=Target(start=60, end=63), FE=[FrameElement(start=65, end=70, name='Factor')])
+    Annotation(id='2018465', sent_id='1278414', frame_name='Importance', target=Target(start=60, end=63), FE=[FrameElement(start=65, end=70, name='Factor')])
     >>> result[0][1][1]
-    Annotation(frame_name='Rewards_and_punishments', target=Target(start=154, end=163), FE=[])
+    Annotation(id='2018466', sent_id='1278414', frame_name='Rewards_and_punishments', target=Target(start=154, end=163), FE=[])
     """
     tree = etree.parse(path, parser)
     tree=transform(tree) # remove namespace
     result = []
     for sent in tree.xpath('sentence'):
+        sent_id = sent.attrib['ID']
         sent_str = sent.xpath('text')[0].text.decode('utf8')
         annotations = []
         for a in sent.xpath('annotationSet[@status="MANUAL"]'):
+            ann_id = a.attrib['ID']
             target_label = a.xpath('layer[@name="Target"]/label')
             if len(target_label) == 1:
                 target_node = target_label[0]
@@ -88,7 +98,9 @@ def parse_fulltext(path):
             if len(FE) == 0:
                 sys.stderr.write('No FrameElement with explicit instantiation found for frame "%r" in "%s"\n' %(a.attrib['frameName'], sent_str.encode('utf8')))
 
-            annotation = Annotation(frame_name = a.attrib['frameName'], 
+            annotation = Annotation(id = ann_id,
+                                    sent_id = sent_id,
+                                    frame_name = a.attrib['frameName'], 
                                     target = target, 
                                     FE = FE)
             
@@ -107,14 +119,14 @@ def align_annotation_with_tree(sent, tree, annotations):
     >>> from nltk.tree import Tree
     >>> sent = 'he says: I say: I love you'
     >>> tree = Tree('ROOT', ['he', 'says', ':', 'I', 'say', ':', 'I', 'love', 'you'])
-    >>> anns = [Annotation(frame_name='he', target=Target(start=0, end=1), FE=[FrameElement(start=3, end=6, name='says'), FrameElement(start=7, end=7, name=':')]), \
-    Annotation(frame_name='I', target=Target(start=9, end=9), FE=[FrameElement(start=14, end=14, name=':'), FrameElement(start=16, end=16, name='I'), FrameElement(start=11, end=16, name='say: I')])]
+    >>> anns = [Annotation(id='1', sent_id='1', frame_name='he', target=Target(start=0, end=1), FE=[FrameElement(start=3, end=6, name='says'), FrameElement(start=7, end=7, name=':')]), \
+    Annotation(id='2', sent_id='2', frame_name='I', target=Target(start=9, end=9), FE=[FrameElement(start=14, end=14, name=':'), FrameElement(start=16, end=16, name='I'), FrameElement(start=11, end=16, name='say: I')])]
     >>> align_annotation_with_tree(sent, tree, anns)
-    [Annotation(frame_name='he', target=Target(start=0, end=1), FE=[FrameElement(start=3, end=6, name='says'), FrameElement(start=8, end=8, name=':')]), Annotation(frame_name='I', target=Target(start=10, end=10), FE=[FrameElement(start=16, end=16, name=':'), FrameElement(start=18, end=18, name='I'), FrameElement(start=12, end=18, name='say: I')])]
+    [Annotation(id='1', sent_id='1', frame_name='he', target=Target(start=0, end=1), FE=[FrameElement(start=3, end=6, name='says'), FrameElement(start=8, end=8, name=':')]), Annotation(id='2', sent_id='2', frame_name='I', target=Target(start=10, end=10), FE=[FrameElement(start=16, end=16, name=':'), FrameElement(start=18, end=18, name='I'), FrameElement(start=12, end=18, name='say: I')])]
     
     >>> sent = ' '.join(tree.leaves())
     >>> align_annotation_with_tree(sent, tree, anns)
-    [Annotation(frame_name='he', target=Target(start=0, end=1), FE=[FrameElement(start=3, end=6, name='says'), FrameElement(start=7, end=7, name=':')]), Annotation(frame_name='I', target=Target(start=9, end=9), FE=[FrameElement(start=14, end=14, name=':'), FrameElement(start=16, end=16, name='I'), FrameElement(start=11, end=16, name='say: I')])]
+    [Annotation(id='1', sent_id='1', frame_name='he', target=Target(start=0, end=1), FE=[FrameElement(start=3, end=6, name='says'), FrameElement(start=7, end=7, name=':')]), Annotation(id='2', sent_id='2', frame_name='I', target=Target(start=9, end=9), FE=[FrameElement(start=14, end=14, name=':'), FrameElement(start=16, end=16, name='I'), FrameElement(start=11, end=16, name='say: I')])]
     """
     sent_new = ' '.join(tree.leaves())
     if sent == sent_new:
@@ -144,7 +156,42 @@ def align_annotation_with_tree(sent, tree, annotations):
         for fe in ann.FE:
             fes.append(FrameElement(correct_pos(fe.start), correct_pos(fe.end), fe.name))
 
-        new_anns.append(Annotation(ann.frame_name, new_target, fes))
+        new_anns.append(Annotation(ann.id, ann.sent_id, ann.frame_name, new_target, fes))
 
     return new_anns
     
+def distribute_annotations(annotations, output_dir, print_sent_path = False):
+    """
+    Distribute the `annotations` to seperate files under `output_dir`
+
+    >>> from pathlib import Path
+    >>> from pickle import load
+    >>> anns = parse_fulltext("test_data/annotation.xml")
+    >>> output_dir = 'test_data/individual_annotations'
+    >>> distribute_annotations(anns, output_dir)
+    >>> Path(output_dir + '/' + anns[0][1][0].sent_id + '.txt').open().read()
+    u'Your contribution to Goodwill will mean more than you may know .'
+    >>> load(Path(output_dir + '/' + anns[0][1][0].id + '.ann').open())
+    Annotation(id='2024608', sent_id='1281539', frame_name='Giving', target=Target(start=5, end=16), FE=[FrameElement(start=0, end=3, name='Donor'), FrameElement(start=18, end=28, name='Recipient')])
+    >>> list(Path(output_dir).glob('*.txt'))
+    [PosixPath('test_data/individual_annotations/1281539.txt')]
+    >>> list(Path(output_dir).glob('*.ann'))
+    [PosixPath('test_data/individual_annotations/2024608.ann'), PosixPath('test_data/individual_annotations/2024610.ann')]
+    >>> import shutil
+    >>> shutil.rmtree(output_dir)
+    """
+    d = Path(output_dir)
+    if not d.exists():
+        d.mkdir()
+
+    for sent, anns in annotations:
+        sent_id = anns[0].sent_id
+        sent_dir = output_dir + '/' + sent_id + '.txt'
+        if print_sent_path:
+            print sent_dir
+        with codecs.open(sent_dir, 'w', 'utf8') as f:
+            f.write(sent)
+
+        for ann in anns:
+            with open(output_dir + '/' + ann.id + '.ann', 'w') as f:
+                pickle.dump(ann, f)

@@ -82,7 +82,10 @@ def make_training_data(feature_funcs, annotations):
 
     return training_instances
 
-def main():
+def phase_two_data():
+    """
+    Extract features and apply feature templating and encoding the data into matrix
+    """
     from pathlib import Path
     try:
         import cPickle as pickle
@@ -110,7 +113,7 @@ def main():
     templates = [tuple([f.name]) for f in ALL_FEATURES] + \
                 [('path_to_frame', 'frame'), ('head_stem', 'frame'), ('head_stem', 'frame', 'path_to_frame'), ('head_stem', 'phrase_type')]
     
-    size = 1
+    size = 40
     instances = []
     for i, p in enumerate(Path("/cs/fs2/home/hxiao/Downloads/fndata-1.5/fulltext/").glob("*.xml")):
         if i == size:
@@ -122,7 +125,7 @@ def main():
     sys.stderr.write("Feature selection...\n")
     x, y = zip(*instances)
     x = apply_templates(x, templates)
-    features = filter_by_frequency(x, 2)
+    features = filter_by_frequency(x, 5)
     sys.stderr.write("Feature encoding...\n")
     x, feature_map = encode(x, features)
     
@@ -133,4 +136,4 @@ def main():
     print len(instances)
 
 if __name__ == "__main__":
-    main()
+    phase_two_data()
