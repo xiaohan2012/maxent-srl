@@ -113,29 +113,28 @@ def parse_fulltext(path):
 
     return result
 
-def align_annotation_with_tree(sent, tree, annotations):
-    """align the annotation element offset from the sentence to the parse tree
+def align_annotation_with_sentence(sent, new_sent, annotations):
+    """align the annotation element offset from the old sentence to new one
     
     >>> from nltk.tree import Tree
     >>> sent = 'he says: I say: I love you'
     >>> tree = Tree('ROOT', ['he', 'says', ':', 'I', 'say', ':', 'I', 'love', 'you'])
     >>> anns = [Annotation(id='1', sent_id='1', frame_name='he', target=Target(start=0, end=1), FE=[FrameElement(start=3, end=6, name='says'), FrameElement(start=7, end=7, name=':')]), \
     Annotation(id='2', sent_id='2', frame_name='I', target=Target(start=9, end=9), FE=[FrameElement(start=14, end=14, name=':'), FrameElement(start=16, end=16, name='I'), FrameElement(start=11, end=16, name='say: I')])]
-    >>> align_annotation_with_tree(sent, tree, anns)
+    >>> align_annotation_with_sentence(sent, ' '.join(tree.leaves()), anns)
     [Annotation(id='1', sent_id='1', frame_name='he', target=Target(start=0, end=1), FE=[FrameElement(start=3, end=6, name='says'), FrameElement(start=8, end=8, name=':')]), Annotation(id='2', sent_id='2', frame_name='I', target=Target(start=10, end=10), FE=[FrameElement(start=16, end=16, name=':'), FrameElement(start=18, end=18, name='I'), FrameElement(start=12, end=18, name='say: I')])]
     
     >>> sent = ' '.join(tree.leaves())
-    >>> align_annotation_with_tree(sent, tree, anns)
+    >>> align_annotation_with_sentence(sent, sent, anns)
     [Annotation(id='1', sent_id='1', frame_name='he', target=Target(start=0, end=1), FE=[FrameElement(start=3, end=6, name='says'), FrameElement(start=7, end=7, name=':')]), Annotation(id='2', sent_id='2', frame_name='I', target=Target(start=9, end=9), FE=[FrameElement(start=14, end=14, name=':'), FrameElement(start=16, end=16, name='I'), FrameElement(start=11, end=16, name='say: I')])]
     """
-    sent_new = ' '.join(tree.leaves())
-    if sent == sent_new:
+    if sent == new_sent:
         return annotations
     
     gaps = []
     i,j = 0,0
-    while i < len(sent) and j <len(sent_new):
-        if sent[i] != sent_new[j]:
+    while i < len(sent) and j <len(new_sent):
+        if sent[i] != new_sent[j]:
             gaps.append(i)
             j += 1
         else:

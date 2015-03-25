@@ -9,3 +9,4 @@ python -m doctest tree_util.py
 python -m doctest data.py
 python -m doctest features.py
 python -m doctest ling_util.py
+python -m doctest dependency_path.py

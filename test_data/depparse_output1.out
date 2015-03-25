@@ -1,0 +1,24 @@
+Sentence #1 (25 tokens):
+Objectives of AL QAEDA: Support God 's religion , establishment of Islamic rule , and restoration of the Islamic Caliphate , God willing .
+[Text=Objectives CharacterOffsetBegin=0 CharacterOffsetEnd=10 PartOfSpeech=NNS] [Text=of CharacterOffsetBegin=11 CharacterOffsetEnd=13 PartOfSpeech=IN] [Text=AL CharacterOffsetBegin=14 CharacterOffsetEnd=16 PartOfSpeech=NNP] [Text=QAEDA CharacterOffsetBegin=17 CharacterOffsetEnd=22 PartOfSpeech=NNP] [Text=: CharacterOffsetBegin=22 CharacterOffsetEnd=23 PartOfSpeech=:] [Text=Support CharacterOffsetBegin=24 CharacterOffsetEnd=31 PartOfSpeech=NN] [Text=God CharacterOffsetBegin=32 CharacterOffsetEnd=35 PartOfSpeech=NNP] [Text='s CharacterOffsetBegin=36 CharacterOffsetEnd=38 PartOfSpeech=POS] [Text=religion CharacterOffsetBegin=39 CharacterOffsetEnd=47 PartOfSpeech=NN] [Text=, CharacterOffsetBegin=48 CharacterOffsetEnd=49 PartOfSpeech=,] [Text=establishment CharacterOffsetBegin=50 CharacterOffsetEnd=63 PartOfSpeech=NN] [Text=of CharacterOffsetBegin=64 CharacterOffsetEnd=66 PartOfSpeech=IN] [Text=Islamic CharacterOffsetBegin=67 CharacterOffsetEnd=74 PartOfSpeech=JJ] [Text=rule CharacterOffsetBegin=75 CharacterOffsetEnd=79 PartOfSpeech=NN] [Text=, CharacterOffsetBegin=80 CharacterOffsetEnd=81 PartOfSpeech=,] [Text=and CharacterOffsetBegin=82 CharacterOffsetEnd=85 PartOfSpeech=CC] [Text=restoration CharacterOffsetBegin=86 CharacterOffsetEnd=97 PartOfSpeech=NN] [Text=of CharacterOffsetBegin=98 CharacterOffsetEnd=100 PartOfSpeech=IN] [Text=the CharacterOffsetBegin=101 CharacterOffsetEnd=104 PartOfSpeech=DT] [Text=Islamic CharacterOffsetBegin=105 CharacterOffsetEnd=112 PartOfSpeech=JJ] [Text=Caliphate CharacterOffsetBegin=113 CharacterOffsetEnd=122 PartOfSpeech=NN] [Text=, CharacterOffsetBegin=123 CharacterOffsetEnd=124 PartOfSpeech=,] [Text=God CharacterOffsetBegin=125 CharacterOffsetEnd=128 PartOfSpeech=NNP] [Text=willing CharacterOffsetBegin=129 CharacterOffsetEnd=136 PartOfSpeech=JJ] [Text=. CharacterOffsetBegin=137 CharacterOffsetEnd=138 PartOfSpeech=.] 
+root(ROOT-0, Objectives-1)
+nn(QAEDA-4, AL-3)
+prep_of(Objectives-1, QAEDA-4)
+punct(Objectives-1, :-5)
+nn(God-7, Support-6)
+poss(religion-9, God-7)
+dep(Objectives-1, religion-9)
+punct(religion-9, ,-10)
+conj_and(religion-9, establishment-11)
+amod(rule-14, Islamic-13)
+prep_of(establishment-11, rule-14)
+punct(religion-9, ,-15)
+conj_and(religion-9, restoration-17)
+det(Caliphate-21, the-19)
+amod(Caliphate-21, Islamic-20)
+prep_of(restoration-17, Caliphate-21)
+punct(religion-9, ,-22)
+appos(religion-9, God-23)
+amod(God-23, willing-24)
+punct(Objectives-1, .-25)
+

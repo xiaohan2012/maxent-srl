@@ -8,53 +8,6 @@
   </header>
   <sentence corpID="204" docID="721" sentNo="1" paragNo="7" aPos="0" ID="1278419">
     <text>Objectives of AL QAEDA: Support God 's religion , establishment of Islamic rule , and restoration of the Islamic Caliphate , God willing .</text>
-    <annotationSet cDate="08/24/2007 01:46:49 PDT Fri" status="UNANN" ID="2015187">
-      <layer rank="1" name="PENN">
-        <label end="9" start="0" name="nns"/>
-        <label end="12" start="11" name="in"/>
-        <label end="15" start="14" name="NP"/>
-        <label end="22" start="17" name="NP"/>
-        <label end="30" start="24" name="VVP"/>
-        <label end="34" start="32" name="NP"/>
-        <label end="37" start="36" name="POS"/>
-        <label end="46" start="39" name="nn"/>
-        <label end="48" start="48" name=","/>
-        <label end="62" start="50" name="nn"/>
-        <label end="65" start="64" name="in"/>
-        <label end="73" start="67" name="jj"/>
-        <label end="78" start="75" name="nn"/>
-        <label end="80" start="80" name=","/>
-        <label end="84" start="82" name="cc"/>
-        <label end="96" start="86" name="nn"/>
-        <label end="99" start="98" name="in"/>
-        <label end="103" start="101" name="dt"/>
-        <label end="111" start="105" name="jj"/>
-        <label end="121" start="113" name="nn"/>
-        <label end="123" start="123" name=","/>
-        <label end="127" start="125" name="NP"/>
-        <label end="135" start="129" name="jj"/>
-        <label end="137" start="137" name="sent"/>
-      </layer>
-      <layer rank="1" name="NER">
-        <label end="36" start="14" name="organization"/>
-      </layer>
-      <layer rank="1" name="WSL">
-        <label end="12" start="11" name="NT"/>
-        <label end="15" start="14" name="NT"/>
-        <label end="22" start="17" name="NT"/>
-        <label end="34" start="32" name="NT"/>
-        <label end="37" start="36" name="NT"/>
-        <label end="48" start="48" name="NT"/>
-        <label end="65" start="64" name="NT"/>
-        <label end="80" start="80" name="NT"/>
-        <label end="84" start="82" name="NT"/>
-        <label end="99" start="98" name="NT"/>
-        <label end="103" start="101" name="NT"/>
-        <label end="123" start="123" name="NT"/>
-        <label end="127" start="125" name="NT"/>
-        <label end="137" start="137" name="NT"/>
-      </layer>
-    </annotationSet>
     <annotationSet cDate="11/07/2007 04:38:20 PST Wed" luID="8050" luName="objective.n" frameID="513" frameName="Purpose" status="MANUAL" ID="2018592">
       <layer rank="1" name="Target">
         <label cBy="597" end="9" start="0" name="Target"/>

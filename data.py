@@ -7,7 +7,7 @@ from basic_struct import Context, Frame, NodePosition
 from feature_extractor import FeatureExtractor
 from tree_util import (collect_nodes, find_node_by_positions)
 from ling_util import convert_brackets
-from annotation import align_annotation_with_tree
+from annotation import align_annotation_with_sentence
         
 parser=StanfordParser(
     path_to_jar = "/cs/fs/home/hxiao/code/stanford-parser-full-2015-01-30/stanford-parser.jar",
@@ -48,7 +48,7 @@ def make_training_data(feature_funcs, annotations):
         # print tree
         # some preprocessing, align the positions and 
         # also use the sentence string given the parse tree
-        anns = align_annotation_with_tree(sent_str, tree, anns)
+        anns = align_annotation_with_sentence(sent_str, ' '.join(tree.leaves()), anns)
         sent_str = ' '.join(tree.leaves())
         for ann in anns:
             frame_name = ann.frame_name
