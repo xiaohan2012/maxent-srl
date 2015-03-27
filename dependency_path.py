@@ -1,8 +1,10 @@
+import sys
 import networkx as nx
 from collections import Counter
 from pathlib import Path
-
+import cPickle as pickle
 from annotation import align_annotation_with_sentence
+from ling_util import convert_bracket_for_token
 
 class DependencyTree(object):
     """
@@ -22,13 +24,13 @@ class DependencyTree(object):
         self.g = g
         self.e2l = e2l
         self.all_nodes = all_nodes
-        self.wp2node = {(n.token, n.index): n
+        self.wp2node = {(convert_bracket_for_token(n.token), n.index): n
                         for n in all_nodes}
     def get_node(self, token, index):
         return self.wp2node[(token, index)]
 
     def tokens(self):
-        tokens = [n.token for n in self.all_nodes]
+        tokens = [convert_bracket_for_token(n.token) for n in self.all_nodes]
         if tokens[0] == 'ROOT':
             return tokens[1:]
         else:
@@ -197,34 +199,70 @@ def count_path_from_nodes_pairs(t, nodes_pairs):
     c = Counter()
     for frame_nodes, ann_nodes in nodes_pairs:
         for fn in frame_nodes:
-            ann_nodes = [n for nodes in ann_nodes for n in nodes]
-            for an in ann_nodes:
+            flattend_nodes = []
+            for nodes in ann_nodes: # flatten 2d list
+                if len(nodes) == 1: #iterate tuple(size 1) is non-sense
+                    flattend_nodes.append(nodes[0])
+                else:
+                    flattend_nodes += [n for n in nodes]
+
+            for an in flattend_nodes:
                 path = get_path(t, fn, an)
                 if path:
                     c[path] += 1
 
     return c
 
+def path_freq(data_dir):
+    """
+    Collect the path frequency from the data under directory `data_dir`
 
-def main():
+    >>> path_freq('test_data/parse_and_annotations/')
+    Counter({(u'dobj',): 1, (u'prep_of',): 1})
+    """
     from annotation import (parse_fulltext, align_annotation_with_sentence)
     from dependency_output_parser import parse_output
     
-    # path_freq = Counter()
+    path_freq = Counter()
+    # load the sentences
 
-    # for sent_path in Path('data/frame_identification').glob('*.txt'):
-    #     sent_str = sent_path.open().read().strip()
-    #     for annotations in sent_path.:
-    #         o = parse_output(open('test_data/depparse_output1.out'))[0]
-    #         t = to_graph(o.nodes, o.edges)
-    #         new_sent = ' '.join(t.tokens())
-    #         aligned_annotations = align_annotation_with_sentence(sent_str, new_sent, annotations)
-    #         nodes_pairs = get_annotation_nodes(aligned_annotations, t)    
-    #         path_freq += count_path_from_nodes_pairs(t, nodes_pairs)
+    sents = {}
+    for sent_path in Path(data_dir).glob('*.txt'):
+        sent_str = sent_path.open(encoding='utf8').read().strip()
+        sents[sent_path.stem] = sent_str
+
+    # load and parse the annotations 
+    depparses = {}
+    for parse_path in Path(data_dir).glob('*.txt.out'):
+        sent_id = parse_path.stem.split('.')[0]
+        o = parse_output(parse_path.open(encoding='utf8'))
+        if len(o) > 1:
+            sys.stderr.write('Dropping sentence %s as it contains more than one sentences\n' %(parse_path))
+            del sents[sent_id]
+            continue
+        tree = to_graph(o[0].nodes, o[0].edges)
+        depparses[sent_id] = tree
+
+    assert set(sents.keys()) == set(depparses.keys())
     
-    # import pdb
-    # pdb.set_trace()
+    # collect the path frequency
+    for ann_path in Path(data_dir).glob('*.ann'):
+        ann = pickle.load(ann_path.open('r'))
+        if ann.sent_id not in sents:
+            sys.stderr.write('Dropping annotation %s as it contains more than one sentences\n' %(ann.id))
+            continue
+        sent = sents[ann.sent_id]
+        t = depparses[ann.sent_id]
+        
+        new_sent = ' '.join(t.tokens())
+        aligned_annotations = align_annotation_with_sentence(sent, new_sent, [ann])
+        nodes_pairs = get_annotation_nodes(aligned_annotations, t)
+        path_freq += count_path_from_nodes_pairs(t, nodes_pairs)
+
+    return path_freq
 
 if __name__ == "__main__":
-    main()
+    freq = path_freq('data/frame_identification')
+    import pdb
+    pdb.set_trace()
 

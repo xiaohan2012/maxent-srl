@@ -2,7 +2,7 @@
 Linguistic utility functions
 """
 from nltk.tree import Tree
-\
+
 rules = {
     'ADJP': ('right',  set(('%', 'QP', 'JJ', 'VBN', 'VBG', 'ADJP', '$', 'JJR', 'JJS', 'DT', 'FW', '****', 'RBR', 'RBS', 'RB',))),
     'ADVP': ('left', set(('RBR', 'RB', 'RBS', 'FW', 'ADVP', 'CD', '****', 'JJR', 'JJS', 'JJ',))),
@@ -94,6 +94,18 @@ def get_head_word(node):
 
 mapping = dict(zip('-LRB- -RRB- -RSB- -RSB- -LCB- -RCB-'.split(), '( ) [ ] { }'.split()))
 
+def convert_bracket_for_token(tok):
+    """
+    >>> convert_bracket_for_token('feng')
+    'feng'
+    >>> convert_bracket_for_token('-LRB-')
+    '('
+    """
+    if tok in mapping:
+        return mapping[tok]
+    else:
+        return tok
+
 def convert_brackets(tree):
     """convert the bracket notation back to the original
 
@@ -111,3 +123,4 @@ def convert_brackets(tree):
             return Tree(t.label(), [convert_brackets(subtree) for subtree in t])
             
     return aux(tree)
+
